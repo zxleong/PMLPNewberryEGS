@@ -124,11 +124,11 @@ n_batches = int(total_samples/ BS)
 print_batches = int(n_batches / 10)
 
 run = 'good'
-InverseMagic = MyModel(8, 3).to(device).double()
+PMLP_model = MyModel(8, 3).to(device).double()
 
 #Optimizer
 lr = 0.0005
-optimizer = torch.optim.Adam(InverseMagic.parameters(), lr = lr, betas=(0.9,0.9))
+optimizer = torch.optim.Adam(PMLP_model.parameters(), lr = lr, betas=(0.9,0.9))
 mseloss = nn.MSELoss()
 
 #Main loop
@@ -140,7 +140,7 @@ start_time_main_loop = time()
 for epoch in range(num_epochs):
     print('\n')
     print('''RUN {}, Epoch {} '''.format(run,epoch))
-    InverseMagic.train()
+    PMLP_model.train()
     batch_Loss = []
     #start time for epoch
     start_time_epoch = time()
@@ -148,10 +148,10 @@ for epoch in range(num_epochs):
         #zero the parameter gradients
         optimizer.zero_grad()
         #predict location
-        # prediction = InverseMagic(X_batch)
+        # prediction = PMLP_model(X_batch)
 
         # Forward pass
-        mean, log_std = InverseMagic(X_batch)
+        mean, log_std = PMLP_model(X_batch)
         std = torch.exp(log_std)
 
         # Negative log-likelihood loss for Gaussian distribution
@@ -194,11 +194,11 @@ for epoch in range(num_epochs):
     ############### Validation ##############
     #########################################
     with torch.no_grad():
-        InverseMagic.eval()
-        # val_prediction = InverseMagic(X_valid_torch)
+        PMLP_model.eval()
+        # val_prediction = PMLP_model(X_valid_torch)
         # val_Loss = EarthDistanceLoss(val_prediction,y_valid_torch)
         # print('EPOCH %d Validation -> EarthLoss: %.9f' %(epoch, val_Loss.item()))
-        mean_valpred, log_std_valpred = InverseMagic(X_valid_torch)
+        mean_valpred, log_std_valpred = PMLP_model(X_valid_torch)
         std_valpred = torch.exp(log_std_valpred)
         # Sample from Gaussian distribution
         samples_valpred = torch.randn((1000, *mean_valpred.shape), device=mean_valpred.device) * std_valpred + mean_valpred
@@ -211,7 +211,7 @@ for epoch in range(num_epochs):
         if val_Loss.item() < np.min(val_record_Loss):
             print('Saving lowest validation loss of: ',val_Loss.item())
             #save weights
-            torch.save(InverseMagic.state_dict(),'weights_logs/GoodRun_Combined_LV.pth')
+            torch.save(PMLP_model.state_dict(),'weights_logs/GoodRun_Combined_LV.pth')
 
 
     #save into dictionary
