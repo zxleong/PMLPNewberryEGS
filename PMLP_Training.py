@@ -1,3 +1,6 @@
+#Zi Xian Leong
+#zxnleong@gmail.com
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
